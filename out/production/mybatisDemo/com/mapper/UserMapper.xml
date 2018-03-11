@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mapper.UserMapper">
+    <select id="findUserById" parameterType="int" resultType="User">
+        select * from user where id = #{1}
+    </select>
+    <select id="findAllUsers" resultType="User">
+        select * from user
+    </select>
+
+    <insert id="addUser" parameterType="User" >
+        <selectKey keyProperty="id" order="AFTER" resultType="int">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into user(username, birthday, sex, address)
+        values(#{username}, #{birthday}, #{sex}, #{address})
+    </insert>
+
+    <delete id="deleteUser" parameterType="int">
+        delete from user where user.id = #{id}
+    </delete>
+    <update id="updateUserById" parameterType="User">
+        update user set username = #{username}, birthday = #{birthday}, sex = #{sex}, address = #{address} where user.id = #{id}
+    </update>
+
+    <select id="findUserList" parameterType="User" resultType="User">
+        select * from user where user.sex = #{sex} and user.username like #{username}
+    </select>
+    <select id="findUserCount" resultType="int">
+        select count(*) from user
+    </select>
+    <select id="findUserList2" parameterType="User" resultType="User">
+        select * from user
+        <!--where可以自动的去掉条件中的第一个and-->
+        <where>
+
+                <if test="sex != null and sex != ''">
+                    and user.sex = #{sex}
+                </if>
+                <if test="username != null">
+                    and user.username like  #{username}
+                </if>
+
+        </where>
+    </select>
+
+    <!--sql片段
+    id:唯一标识
+    经验：是基于单表来定义sql片段，这样的话sql片段的可重用性才高
+    一般不包含where
+    -->
+    <sql id="query_user_where">
+        <if test="sex != null and sex != ''">
+            and user.sex = #{sex}
+        </if>
+        <if test="username != null">
+            and user.username like  #{username}
+        </if>
+    </sql>
+
+    <select id="getAllOrderInfo" resultType="map">
+      select orders.number,user.username from orders
+join user on orders.user_id = user.id
+    </select>
+</mapper>
